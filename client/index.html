@@ -1,17 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <title>ParriChat</title>
+
     <script type="module">
-        import { io } from 'https:/cdn.socket.io/4.3.2/socket.io.esm.min.js'
+        import { io } from 'https://cdn.socket.io/4.3.2/socket.io.esm.min.js'
+
+        const getUsername = async () => {
+            const username = localStorage.getItem('username')
+            if (username) {
+                console.log(`User existed ${username}`)
+                return username
+            }
+
+            const res = await fetch('https://random-data-api.com/api/users/random_user')
+            const { username: randomUsername } = await res.json()
+
+            localStorage.setItem('username', randomUsername)
+            return randomUsername
+        }
 
         const socket = io({
             auth: {
-                token: '123',
-                // username: await getUsername(),
+                username: await getUsername(),
                 serverOffset: 0
             }
         })
@@ -20,59 +36,53 @@
         const input = document.getElementById('input')
         const messages = document.getElementById('messages')
 
-        // const getUsername = async () => {
-        //     const username = localStorage.getItem('username')
-        //     if (username) {
-        //         console.log(`user existed ${username}`)
-        //     }
-
-        //     const res = await fetch ('https://random-data-api.com/api/users/random_user')
-        //     const { username: randomUsername} = res.json()
-
-        //     localStorage.setItem('username', randomUsername)
-        //     return randomUsername
-        // }
-
-        socket.on('chat message', (msg, serverOffset) => {
-            const item = `<li>${msg}</li>`
+        socket.on('chat message', (msg, serverOffset, username) => {
+            const item = `<li>
+            <small>${username} says:</small>
+            <p>${msg} </p>
+          </li>`
             messages.insertAdjacentHTML('beforeend', item)
             socket.auth.serverOffset = serverOffset
+            // scroll to bottom of messages
+            messages.scrollTop = messages.scrollHeight
         })
 
         form.addEventListener('submit', (e) => {
             e.preventDefault()
 
-            if(input.value) {
+            if (input.value) {
                 socket.emit('chat message', input.value)
                 input.value = ''
             }
         })
     </script>
+
     <style>
         *,
         *::before,
         *::after {
             box-sizing: border-box;
         }
-        :root {
-            color-scheme: dark light;
-        }
-        
+
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            display:grid;
+            display: grid;
             place-content: center;
             height: 100vh;
-            padding: 36px;
+            padding: 36px 36px 100px 36px;
             grid-template-rows: 1fr;
             background: rgb(3, 3, 3);
         }
 
         #messages {
             list-style-type: none;
-            margin:0;
-            padding: 0;  
+            margin: 0;
+            padding: 0;
+            overflow-y: scroll;
+            height: 100%;
+            scroll-behavior: smooth;
+            padding-bottom: 5rem !important;
         }
 
         #messages {
@@ -95,14 +105,16 @@
         }
 
         #form {
-            bottom:0;
+            bottom: 0;
             display: flex;
             height: 48px;
             left: 0;
             padding: 4px;
             position: absolute;
             right: 0;
+            z-index: 1;
         }
+
         #input {
             border-radius: 9999px;
             border: 1px solid #eee;
@@ -115,19 +127,32 @@
             outline: 0;
         }
 
-        
+        #form>button {
+            background: #09f;
+            color: #fff;
+            border: 0;
+            margin: 4px;
+            border-radius: 4px;
+        }
 
+        #form>button:hover {
+            background: #0cf;
+        }
     </style>
 </head>
+
 <body>
+    <h1 class="text-center text-light mb-4">ParriChat</h1>
     <section id="chat">
-        <h1 class="text-center text-light mb-4">ParriChat</h1>
         <ul id="messages"></ul>
         <form id="form" class="text-center mt-3">
             <input type="text " name="message" id="input" placeholder="Type a message" autocomplete="off" />
             <button class="button bg-primary rounded-4 text-light" type="submit"><b>Send</b></button>
         </form>
     </section>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
