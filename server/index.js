@@ -33,7 +33,7 @@ io.on('connection', async (socket) => {
   console.log('a user has connected!')
 
   socket.on('disconnect', () => {
-    console.log('an user has disconnected')
+    console.log('an user has disconnected') //prueba
   })
 
   socket.on('chat message', async (msg) => {
