@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <title>Document</title>
+    <script type="module">
+        import { io } from 'https:/cdn.socket.io/4.3.2/socket.io.esm.min.js'
+
+        const socket = io({
+            auth: {
+                token: '123',
+                // username: await getUsername(),
+                serverOffset: 0
+            }
+        })
+
+        const form = document.getElementById('form')
+        const input = document.getElementById('input')
+        const messages = document.getElementById('messages')
+
+        // const getUsername = async () => {
+        //     const username = localStorage.getItem('username')
+        //     if (username) {
+        //         console.log(`user existed ${username}`)
+        //     }
+
+        //     const res = await fetch ('https://random-data-api.com/api/users/random_user')
+        //     const { username: randomUsername} = res.json()
+
+        //     localStorage.setItem('username', randomUsername)
+        //     return randomUsername
+        // }
+
+        socket.on('chat message', (msg, serverOffset) => {
+            const item = `<li>${msg}</li>`
+            messages.insertAdjacentHTML('beforeend', item)
+            socket.auth.serverOffset = serverOffset
+        })
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault()
+
+            if(input.value) {
+                socket.emit('chat message', input.value)
+                input.value = ''
+            }
+        })
+    </script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+        :root {
+            color-scheme: dark light;
+        }
+        
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display:grid;
+            place-content: center;
+            height: 100vh;
+            padding: 36px;
+            grid-template-rows: 1fr;
+            background: rgb(3, 3, 3);
+        }
+
+        #messages {
+            list-style-type: none;
+            margin:0;
+            padding: 0;  
+        }
+
+        #messages {
+            padding: .5rem 1rem;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        /* #messages > li:nth-child(odd) {
+            background: #eee;
+        } */
+
+        #chat {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 450px;
+            height: 100%;
+            position: relative;
+        }
+
+        #form {
+            bottom:0;
+            display: flex;
+            height: 48px;
+            left: 0;
+            padding: 4px;
+            position: absolute;
+            right: 0;
+        }
+        #input {
+            border-radius: 9999px;
+            border: 1px solid #eee;
+            flex: 1;
+            margin: 4px;
+            padding: 0 8px;
+        }
+
+        #input:focus {
+            outline: 0;
+        }
+
+        
+
+    </style>
+</head>
+<body>
+    <section id="chat">
+        <h1 class="text-center text-light mb-4">ParriChat</h1>
+        <ul id="messages"></ul>
+        <form id="form" class="text-center mt-3">
+            <input type="text " name="message" id="input" placeholder="Type a message" autocomplete="off" />
+            <button class="button bg-primary rounded-4 text-light" type="submit"><b>Send</b></button>
+        </form>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
